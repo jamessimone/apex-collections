@@ -92,6 +92,19 @@ private class Filter_Tests {
         System.assertEquals(accountId, con.AccountId);
     }
 
+    @isTest
+    static void it_should_return_elements_that_match_criteria_to_filtered_set() {
+        List<Account> accounts = new List<Account> { acc };
+
+        Set<SObject> filteredObjects = Filter.the(accounts)
+            .whereField(Account.Id)
+            .isNot(null)
+            .gatherTo
+            .filteredSet();
+
+        System.assertEquals(true, filteredObjects.contains(acc));
+    }
+
     static final Id leadId = '00Q000000000000';
     static final Id accountId = '001000000000000';
     static final Id contactId = '003000000000000';
