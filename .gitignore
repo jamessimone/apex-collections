@@ -1,0 +1,18 @@
+#Root folders
+.settings
+config
+debug
+deploy
+node_modules
+.vs/
+.vscode/
+#Root files
+*.bat
+sloppy.*
+
+#Build files
+dmc_config.json
+dmcignore.dmcignore
+.vim-force.com/session.properties
+src/.vim-force.com/session.properties
+

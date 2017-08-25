@@ -1,9 +1,0 @@
-{
-  "default_org": "filter",
-  "deploy_mode": "dynamic",
-  "api_version": 40,
-  "colorize": true,
-  "background": "light",
-  "log_level": "info",
-  "failing_test_last": true
-}
