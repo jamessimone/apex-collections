@@ -7,10 +7,12 @@ public class Filter {
     private String whereField;
     private String index;
     private Object value;
+    private SObject ref;
 
     private Filter() {
         this.filtered = new Set<SObject>();
         this.index = '0';
+        this.value = 0;
         this.mapOfMaps = new Map<String, SObject>();
     }
 
@@ -101,26 +103,49 @@ public class Filter {
         this.whereField = field;
         for(String key : this.mapOfMaps.keySet()) {
             this.index = key;
-            SObject o = this.mapOfMaps.get(key);
-            if(get(o) != null) {
-                this.cleanCollections(o);
+            this.ref = this.mapOfMaps.get(key);
+            if(get() != null) {
+                this.cleanCollections();
             }
         }
         return this;
     }
 
-    private Object get(SObject o) {
-        return o.get(this.whereField);
+    private Object get() {
+        return this.ref.get(this.whereField);
     }
 
-    public Filter greaterThan(Integer num) {
-       for(String key : this.mapOfMaps.keySet()) {
+    public Filter lessThan(Object otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
             this.index = key;
-            SObject o = this.mapOfMaps.get(key);
-            Integer base = 0;
-            base = get(o) != null ? (Integer) get(o) : base;
-            if(base < num) {
-                this.cleanCollections(o);
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+            if(new Comparer(value).compareTo(otherValue) == 1) {
+                this.cleanCollections();
+            }
+        }
+        return this;
+    }
+
+    public Filter greaterThan(Object otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
+            this.index = key;
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+            if(new Comparer(value).compareTo(otherValue) == -1) {
+                this.cleanCollections();
+            }
+        }
+        return this;
+    }
+
+    public Filter equals(Object otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
+            this.index = key;
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+            if(new Comparer(value).compareTo(otherValue) == 0) {
+                this.cleanCollections();
             }
         }
         return this;
@@ -128,11 +153,11 @@ public class Filter {
 
     Public Filter andReplaceWithValueFrom(Map<String, SObject> replacementMap, SObjectField matchingField, SObjectField fieldToAddValue) {
         for(String key : this.mapOfMaps.keySet()) {
-            SObject record = this.mapOfMaps.get(key);
-            if(record.get(this.whereField) == this.value) {
+            this.ref = this.mapOfMaps.get(key);
+            if(ref.get(this.whereField) == this.value) {
                 if(replacementMap.containsKey(key)) {
                     SObject matchingRecord = replacementMap.get(key);
-                    record.put(fieldToAddValue, matchingRecord.get(matchingField));
+                    ref.put(fieldToAddValue, matchingRecord.get(matchingField));
                 }
             }
         }
@@ -147,13 +172,27 @@ public class Filter {
         return this.andReplaceWithValueFrom(newMap, matchingField, fieldToAddValue);
     }
 
-    private void cleanCollections(SObject o) {
+    private void cleanCollections() {
         this.mapOfMaps.remove(this.index);
         if(this.index instanceof Id) {
             this.mapIdCollection.remove(Id.valueOf(this.index));
         }
         this.mapCollection.remove(this.index);
         this.collection.remove(Integer.valueof(this.index));
-        this.filtered.add(o);
+        this.filtered.add(this.ref);
+    }
+
+    private class Comparer implements Comparable {
+        private final Integer base;
+        public Comparer(Object base) {
+            this.base = Integer.valueOf(base);
+        }
+
+        public Integer compareTo(Object comparison) {
+            Integer comparisonValue = Integer.valueOf(comparison);
+            if(base == comparisonValue) return 0;
+            if(base < comparisonValue) return -1;
+            return 1;
+        }
     }
 }
