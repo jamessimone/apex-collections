@@ -105,6 +105,26 @@ private class Filter_Tests {
         System.assertEquals(true, filteredObjects.contains(acc));
     }
 
+    @isTest
+    static void it_should_track_the_index_correctly_when_moving_elements() {
+        Account a = new Account(Name = 'A');
+        Account b = new Account(Name = 'B');
+        Account c = new Account(Name = 'C');
+        List<Account> accounts = new List<Account>{ a, b, c};
+
+        Set<SObject> filtered = Filter.the(accounts)
+            .whereField(Account.Name)
+            .equals('A')
+            .also
+            .equals('B')
+            .to
+            .filteredSet();
+
+        System.assertEquals(true, filtered.contains(a));
+        System.assertEquals(true, filtered.contains(b));
+        System.assertEquals(1, accounts.size());
+    }
+
     static final Id leadId = '00Q000000000000';
     static final Id accountId = '001000000000000';
     static final Id contactId = '003000000000000';

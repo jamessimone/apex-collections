@@ -249,11 +249,11 @@ public class Filter {
     private class Comparer implements Comparable {
         private final Integer base;
         private Comparer(Object base) {
-            this.base = Integer.valueOf(base);
+            this.base = base.hashCode();
         }
 
         public Integer compareTo(Object comparison) {
-            Integer comparisonValue = Integer.valueOf(comparison);
+            Integer comparisonValue = comparison.hashCode();
             if(base == comparisonValue) return 0;
             if(base < comparisonValue) return -1;
             return 1;
