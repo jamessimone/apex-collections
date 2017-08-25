@@ -1,24 +1,18 @@
 @isTest
 private class Filter_Tests {
-    static final Id leadId = '00Q000000000000';
-    static final Id accountId = '001000000000000';
-    static final Id contactId = '003000000000000';
-    static final String testString = 'test@test.com';
-
     @isTest
     static void it_should_remove_matching_items_from_one_list_and_add_to_new_list() {
-        Account a = new Account(Name = 'Hi');
-        List<Account> accs = new List<Account>{ a };
+        List<Account> accounts = new List<Account>{ acc };
 
-        Filter that = Filter.the(accs).byField(Account.Name);
-        System.assertEquals(0, accs.size());
-        System.assert(that.to.filteredSet().contains(a));
+        Filter that = Filter.the(accounts).byField(Account.Name);
+        System.assertEquals(0, accounts.size());
+        System.assert(that.to.filteredSet().contains(acc));
     }
 
     @isTest
-    static void it_should_remove_items_from_one_list_using_conditional() {
-        Lead lead = new Lead(NumberOfEmployees = 5);
-        List<Lead> leads = new List<Lead>{ lead };
+    static void it_should_remove_items_from_list_using_greater_than_conditional() {
+        ld.NumberOfEmployees = 5;
+        List<Lead> leads = new List<Lead>{ ld };
 
         Filter that = Filter.the(leads)
             .whereField(Schema.Lead.NumberOfEmployees)
@@ -31,15 +25,43 @@ private class Filter_Tests {
     }
 
     @isTest
-    static void it_should_return_map_of_filtered_values() {
-        Lead l = new Lead(Id = leadId, FirstName = 'James');
+    static void it_should_remove_items_from_list_using_less_than_conditional() {
+        ld.NumberOfEmployees = 5;
+        List<Lead> leads = new List<Lead>{ ld };
 
-        Map<Id, SObject> filteredMap = Filter.the(new List<Lead>{ l })
+        Filter that = Filter.the(leads)
+            .whereField(Lead.NumberOfEmployees)
+            .lessThan(7);
+
+        System.assertEquals(false, leads.isEmpty());
+
+        that.lessThan(2);
+        System.assertEquals(true, leads.isEmpty());
+    }
+
+    @isTest
+    static void it_should_remove_items_from_list_using_equals_than_conditional() {
+        ld.NumberOfEmployees = 5;
+        List<Lead> leads = new List<Lead>{ ld };
+
+        Filter that = Filter.the(leads)
+            .whereField(Lead.NumberOfEmployees)
+            .equals(7);
+
+        System.assertEquals(false, leads.isEmpty());
+
+        that.equals(5);
+        System.assertEquals(true, leads.isEmpty());
+    }
+
+    @isTest
+    static void it_should_return_map_of_filtered_values() {
+        Map<Id, SObject> filteredMap = Filter.the(new List<Lead>{ ld })
             .byField(Lead.FirstName)
             .to
             .filteredMap();
 
-        System.assertEquals(true, filteredMap.containsKey(l.Id));
+        System.assertEquals(true, filteredMap.containsKey(ld.Id));
     }
 
     @isTest
@@ -50,7 +72,7 @@ private class Filter_Tests {
         Filter.the((Map<String, SObject>) contactMap)
             .whereField(Contact.AccountId)
             .is(null)
-            .andReplaceWithValueFrom(accountMap, Account.Id, Contact.AccountId);
+            .andReplaceFieldWithValueFrom(Contact.AccountId, accountMap, Account.Id);
 
         Contact con = contactMap.get(testString);
         System.assertEquals(accountId, con.AccountId);
@@ -64,9 +86,17 @@ private class Filter_Tests {
         Filter.the((Map<Id, SObject>) contactMap)
             .whereField(Contact.AccountId)
             .is(null)
-            .andReplaceWithValueFrom(accountMap, Account.Id, Contact.AccountId);
+            .andReplaceFieldWithValueFrom(Contact.AccountId, accountMap, Account.Id);
 
         Contact con = contactMap.get(contactId);
         System.assertEquals(accountId, con.AccountId);
     }
+
+    static final Id leadId = '00Q000000000000';
+    static final Id accountId = '001000000000000';
+    static final Id contactId = '003000000000000';
+    static final String testString = 'test@test.com';
+    static final Lead ld = new Lead(Id = leadId, FirstName = 'Bird', LastName = 'Person');
+    static final Account acc =  new Account(Id = accountId, Name = 'Morty');
+    static final Contact con = new ContacT(Id = contactId, FirstName = 'Pencil', LastName = 'Vester');
 }

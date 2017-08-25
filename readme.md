@@ -19,8 +19,8 @@ Filter is a statically called helper class that can be chained to filter lists /
     Filter.the((Map<Id or String, SObject>) contactMap)
         .whereField(Contact.AccountId)
         .is(null)
-        .andReplaceWithValueFrom(Map<Id or String, SObject> accountMap, Account.Id, Contact.AccountId);
+        .andReplaceFieldWithValueFrom(Contact.AccountId, Map<Id or String, SObject> accountMap, Account.Id);
 
 * first example returns List<SObject> with any elements removed from the first collection. Depending on your use case, you may not care about the return value. If that's the case, you can drop the ".to.filteredList()" part.
 
-* Maps require a cast to (Map<Id, SObject>) or (Map<String, SObject>).  The first parameter map in "andReplaceWithValueFrom" needs to have a matching key value!  Useful if you are working with multiple maps at a time and need to update values in the first map with a field value from the second.
+* Maps require a cast to (Map<Id, SObject>) or (Map<String, SObject>).  The second parameter in "andReplaceWithValueFrom" is a map that needs to have a matching key value!  Useful if you are working with multiple maps at a time and need to update values in the first map with a field value from the second.
