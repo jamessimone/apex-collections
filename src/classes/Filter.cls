@@ -4,15 +4,18 @@ public class Filter {
     private final Map<String, SObject> mapCollection;
     private final Map<Id, SObject> mapIdCollection;
     private final Map<String, SObject> mapOfMaps;
+
     private String whereField;
     private String index;
     private Object value;
     private SObject ref;
+    private Integer shouldCompareOrUpdate;
 
     private Filter() {
         this.filtered = new Set<SObject>();
         this.index = '0';
         this.value = 0;
+        this.shouldCompareOrUpdate = 0;
         this.mapOfMaps = new Map<String, SObject>();
     }
 
@@ -68,6 +71,7 @@ public class Filter {
     }
 
     public Filter to { get { return this; }}
+    public Filter also { get { return this; }}
 
     public Set<SObject> filteredSet() {
         return this.filtered;
@@ -91,6 +95,13 @@ public class Filter {
     }
 
     public Filter is(Object value) {
+        this.shouldCompareOrUpdate = 1;
+        this.value = value;
+        return this;
+    }
+
+    public Filter isNot(Object value) {
+        this.shouldCompareOrUpdate = -1;
         this.value = value;
         return this;
     }
@@ -113,6 +124,10 @@ public class Filter {
 
     private Object get() {
         return this.ref.get(this.whereField);
+    }
+
+    private void put(SObjectField fieldToUpdate, Object value) {
+        this.ref.put(fieldToUpdate, value);
     }
 
     public Filter lessThan(Object otherValue) {
@@ -151,13 +166,37 @@ public class Filter {
         return this;
     }
 
-    Public Filter andReplaceFieldWithValueFrom(SObjectField fieldToAddValue, Map<String, SObject> replacementMap, SObjectField matchingField) {
+    public Filter notEquals(Object otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
+            this.index = key;
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+            Integer comparisonResult = new Comparer(value).compareTo(otherValue);
+            if(comparisonResult != 0) {
+                this.cleanCollections();
+            }
+        }
+        return this;
+    }
+
+    public Filter andReplaceFieldWithValueFrom(SObjectField fieldToAddValue, Map<String, SObject> replacementMap, SObjectField matchingField) {
         for(String key : this.mapOfMaps.keySet()) {
             this.ref = this.mapOfMaps.get(key);
-            if(ref.get(this.whereField) == this.value) {
-                if(replacementMap.containsKey(key)) {
-                    SObject matchingRecord = replacementMap.get(key);
-                    ref.put(fieldToAddValue, matchingRecord.get(matchingField));
+            if(replacementMap.containsKey(key)) {
+                SObject matchingRecord = replacementMap.get(key);
+                //If it's a blanket update, update any matching records
+                if(this.shouldCompareOrUpdate == 0) {
+                    this.put(fieldToAddValue, matchingRecord.get(matchingField));
+                //otherwise if isNot was called, check that the values are not equal before updating
+                } else if(this.shouldCompareOrUpdate == -1) {
+                    if(this.ref.get(this.whereField) != this.value) {
+                        this.put(fieldToAddValue, matchingRecord.get(matchingField));
+                    }
+                //otherwise if "is" was called, check that the values are equal before updating
+                } else if(this.shouldCompareOrUpdate == 1) {
+                    if(this.ref.get(this.whereField) == this.value) {
+                        this.put(fieldToAddValue, matchingRecord.get(matchingField));
+                    }
                 }
             }
         }
@@ -172,6 +211,31 @@ public class Filter {
         return this.andReplaceFieldWithValueFrom(fieldToAddValue, newMap, matchingField);
     }
 
+    public Filter gather { get { return gatherTo; }}
+
+    public Filter gatherTo {
+        get {
+            for(String key : this.mapOfMaps.keySet()) {
+                this.ref = this.mapOfMaps.get(key);
+                //If it's a blanket update, update any matching records
+                if(this.shouldCompareOrUpdate == 0) {
+                    this.filtered.add(this.ref);
+                //otherwise if isNot was called, check that the values are not equal before updating
+                } else if(this.shouldCompareOrUpdate == -1) {
+                    if(this.ref != this.value) {
+                        this.filtered.add(this.ref);
+                    }
+                //otherwise if "is" was called, check that the values are equal before updating
+                } else if(this.shouldCompareOrUpdate == 1) {
+                     if(this.ref == this.value) {
+                         this.filtered.add(this.ref);
+                     }
+                }
+            }
+            return this;
+        }
+    }
+
     private void cleanCollections() {
         this.mapOfMaps.remove(this.index);
         if(this.index instanceof Id) {
@@ -184,7 +248,7 @@ public class Filter {
 
     private class Comparer implements Comparable {
         private final Integer base;
-        public Comparer(Object base) {
+        private Comparer(Object base) {
             this.base = Integer.valueOf(base);
         }
 
