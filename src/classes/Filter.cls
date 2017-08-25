@@ -151,7 +151,7 @@ public class Filter {
         return this;
     }
 
-    Public Filter andReplaceWithValueFrom(Map<String, SObject> replacementMap, SObjectField matchingField, SObjectField fieldToAddValue) {
+    Public Filter andReplaceFieldWithValueFrom(SObjectField fieldToAddValue, Map<String, SObject> replacementMap, SObjectField matchingField) {
         for(String key : this.mapOfMaps.keySet()) {
             this.ref = this.mapOfMaps.get(key);
             if(ref.get(this.whereField) == this.value) {
@@ -164,12 +164,12 @@ public class Filter {
         return this;
     }
 
-    public Filter andReplaceWithValueFrom(Map<Id, SObject> replacementMap, SObjectField matchingField, SObjectField fieldToAddValue) {
+    public Filter andReplaceFieldWithValueFrom(SObjectField fieldToAddValue, Map<Id, SObject> replacementMap, SObjectField matchingField) {
         Map<String, SObject> newMap = new Map<String, SObject>();
         for(Id key : replacementMap.keySet()) {
             newMap.put(key, replacementMap.get(key));
         }
-        return this.andReplaceWithValueFrom(newMap, matchingField, fieldToAddValue);
+        return this.andReplaceFieldWithValueFrom(fieldToAddValue, newMap, matchingField);
     }
 
     private void cleanCollections() {
