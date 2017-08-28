@@ -1,6 +1,6 @@
 ## Apex Collections - chaining support for filtering Apex collections.
 
-Salesforce's Apex implementation of Java has no support for lambdas, which makes working with the equivalent of IEnumberable<T> collections tiresome. Repeated "for(...) { method body }" loops abound
+Salesforce's Apex implementation of Java has no support for lambdas, which makes working with the equivalent of IEnumerable<T> collections tiresome. Repeated "for(...) { method body }" loops abound
 in Apex code.
 
 Filter is a static helper class that can be chained to filter lists / other collections to:
