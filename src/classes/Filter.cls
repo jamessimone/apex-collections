@@ -179,6 +179,14 @@ public class Filter {
         return this;
     }
 
+    public Filter isIn(List<Object> otherValues) {
+        for(Object otherValue : otherValues) {
+            this.equals(otherValue);
+        }
+
+        return this;
+    }
+
     public Filter andReplaceFieldWithValueFrom(SObjectField fieldToAddValue, Map<String, SObject> replacementMap, SObjectField matchingField) {
         for(String key : this.mapOfMaps.keySet()) {
             this.ref = this.mapOfMaps.get(key);
