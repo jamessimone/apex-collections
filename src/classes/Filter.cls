@@ -4,6 +4,7 @@ public class Filter {
     private final Map<String, SObject> mapCollection;
     private final Map<Id, SObject> mapIdCollection;
     private final Map<String, SObject> mapOfMaps;
+    private static Boolean shouldAlterOriginalCollection = false;
 
     private String whereField;
     private String index;
@@ -244,14 +245,22 @@ public class Filter {
         }
     }
 
+    public Filter modifiyOriginalCollection {
+        get {
+            shouldAlterOriginalCollection = true;
+            return this;
+        }
+    }
+
     private void cleanCollections() {
+        this.filtered.add(this.ref);
+        if(shouldAlterOriginalCollection == false) return;
         this.mapOfMaps.remove(this.index);
         if(this.index instanceof Id) {
             this.mapIdCollection.remove(Id.valueOf(this.index));
         }
         this.mapCollection.remove(this.index);
         this.collection.remove(Integer.valueof(this.index));
-        this.filtered.add(this.ref);
     }
 
     private class Comparer implements Comparable {
@@ -262,9 +271,13 @@ public class Filter {
 
         public Integer compareTo(Object comparison) {
             Integer comparisonValue = comparison.hashCode();
-            if(base == comparisonValue) return 0;
-            if(base < comparisonValue) return -1;
-            return 1;
+            if(base == comparisonValue) {
+                return 0;
+            } else if(base < comparisonValue) {
+                return -1;
+            } else {
+                return 1;
+            }
         }
     }
 }

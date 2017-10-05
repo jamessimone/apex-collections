@@ -5,7 +5,6 @@ private class Filter_Tests {
         List<Account> accounts = new List<Account>{ acc };
 
         Filter that = Filter.the(accounts).byField(Account.Name);
-        System.assertEquals(0, accounts.size());
         System.assert(that.to.filteredSet().contains(acc));
     }
 
@@ -18,14 +17,14 @@ private class Filter_Tests {
             .whereField(Schema.Lead.NumberOfEmployees)
             .greaterThan(2);
 
-        System.assertEquals(false, leads.isEmpty());
+        System.assertEquals(true, that.filteredList().isEmpty());
 
         that.greaterThan(7);
-        System.assertEquals(true, leads.isEmpty());
+        System.assertEquals(true, that.filteredList().isEmpty() == false);
     }
 
     @isTest
-    static void it_should_remove_items_from_list_using_less_than_conditional() {
+    static void it_should_filter_using_less_than_conditional() {
         ld.NumberOfEmployees = 5;
         List<Lead> leads = new List<Lead>{ ld };
 
@@ -33,14 +32,14 @@ private class Filter_Tests {
             .whereField(Lead.NumberOfEmployees)
             .lessThan(7);
 
-        System.assertEquals(false, leads.isEmpty());
+        System.assertEquals(true, that.filteredList().isEmpty());
 
         that.lessThan(2);
-        System.assertEquals(true, leads.isEmpty());
+        System.assertEquals(true, that.filteredList().isEmpty() == false);
     }
 
     @isTest
-    static void it_should_remove_items_from_list_using_equals_than_conditional() {
+    static void it_should_filter_using_equals_conditional() {
         ld.NumberOfEmployees = 5;
         List<Lead> leads = new List<Lead>{ ld };
 
@@ -48,10 +47,10 @@ private class Filter_Tests {
             .whereField(Lead.NumberOfEmployees)
             .equals(7);
 
-        System.assertEquals(false, leads.isEmpty());
+        System.assertEquals(true, that.filteredList().isEmpty());
 
         that.equals(5);
-        System.assertEquals(true, leads.isEmpty());
+        System.assertEquals(true, that.filteredList().isEmpty() == false);
     }
 
     @isTest
@@ -122,7 +121,6 @@ private class Filter_Tests {
 
         System.assertEquals(true, filtered.contains(a));
         System.assertEquals(true, filtered.contains(b));
-        System.assertEquals(1, accounts.size());
     }
 
     @isTest
@@ -140,7 +138,6 @@ private class Filter_Tests {
 
         System.assertEquals(true, filtered.contains(a));
         System.assertEquals(true, filtered.contains(b));
-        System.assertEquals(1, accounts.size());
     }
 
     static final Id leadId = '00Q000000000000';
