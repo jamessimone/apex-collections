@@ -1,5 +1,9 @@
 ## Apex Collections - chaining support for filtering Apex collections.
 
+<a href="https://githubsfdeploy.herokuapp.com">
+  <img alt="Deploy to Salesforce" src="https://raw.githubusercontent.com/afawcett/githubsfdeploy/master/src/main/webapp/resources/img/deploy.png">
+</a>
+
 Salesforce's Apex implementation of Java has no support for lambdas, which makes working with the equivalent of IEnumerable<T> collections tiresome. Repeated "for(...) { method body }" loops abound
 in Apex code.
 
