@@ -55,6 +55,65 @@ private class Filter_Tests {
     }
 
     @isTest
+    static void it_should_remove_items_from_list_containing_string() {
+        String valueToCheck = 'Ooo, wee, Rick.';
+        con.Description = valueToCheck;
+        List<Contact> contacts = new List<Contact>{ con };
+
+        // Let's include a mini-test to prove why this 'containing' method is helpful
+        // Long text area fields can't be filtered in SOQL - mini-test to show that it would fail
+        try {
+            // Contact.Description is a long text area and can't be filtered in SOQL
+            List<Contact> willFailAtRuntime = Database.query('SELECT Id FROM Contact WHERE Description LIKE \'%' + valueToCheck + '%\'');
+        } catch(QueryException ex) {
+            String expectedErrorMessage = 'field \'Description\' can not be filtered in query call';
+            System.assert(ex.getMessage().contains(expectedErrorMessage));
+        }
+
+        // Real test time
+        Test.startTest();
+
+        Filter that = Filter.the(contacts)
+            .whereField(Schema.Contact.Description)
+            .containsString('Summer');
+
+        System.assertEquals(false, contacts.isEmpty());
+
+        that.containsString(valueToCheck);
+        System.assertEquals(true, contacts.isEmpty());
+
+        Test.stopTest();
+    }
+
+    @isTest
+    static void it_should_remove_items_from_list_that_starts_with_string() {
+        List<Contact> contacts = new List<Contact>{ con };
+
+        Filter that = Filter.the(contacts)
+            .whereField(Schema.Contact.Description)
+            .startsWithString('Look at me!');
+
+        System.assertEquals(false, contacts.isEmpty());
+
+        that.startsWithString('Ooo, wee');
+        System.assertEquals(true, contacts.isEmpty());
+    }
+
+    @isTest
+    static void it_should_remove_items_from_list_that_ends_with_string() {
+        List<Contact> contacts = new List<Contact>{ con };
+
+        Filter that = Filter.the(contacts)
+            .whereField(Schema.Contact.Description)
+            .endsWithString('Beth');
+
+        System.assertEquals(false, contacts.isEmpty());
+
+        that.endsWithString('Rick');
+        System.assertEquals(true, contacts.isEmpty());
+    }
+
+    @isTest
     static void it_should_return_map_of_filtered_values() {
         Map<Id, SObject> filteredMap = Filter.the(new List<Lead>{ ld })
             .byField(Lead.FirstName)
@@ -149,5 +208,5 @@ private class Filter_Tests {
     static final String testString = 'test@test.com';
     static final Lead ld = new Lead(Id = leadId, FirstName = 'Bird', LastName = 'Person');
     static final Account acc =  new Account(Id = accountId, Name = 'Morty');
-    static final Contact con = new ContacT(Id = contactId, FirstName = 'Pencil', LastName = 'Vester');
+    static final Contact con = new Contact(Id = contactId, FirstName = 'Pencil', LastName = 'Vester', Description = 'Ooo, wee, Rick');
 }

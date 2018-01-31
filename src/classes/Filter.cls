@@ -187,6 +187,48 @@ public class Filter {
         return this;
     }
 
+    public Filter containsString(String otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
+            this.index = key;
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+
+            if(String.valueOf(this.value).contains(otherValue)) {
+                this.cleanCollections();
+            }
+
+        }
+        return this;
+    }
+
+    public Filter startsWithString(String otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
+            this.index = key;
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+
+            if(String.valueOf(this.value).startsWith(otherValue)) {
+                this.cleanCollections();
+            }
+
+        }
+        return this;
+    }
+
+    public Filter endsWithString(String otherValue) {
+        for(String key : this.mapOfMaps.keySet()) {
+            this.index = key;
+            this.ref = this.mapOfMaps.get(key);
+            this.value = get() != null ? get() : value;
+
+            if(String.valueOf(this.value).endsWith(otherValue)) {
+                this.cleanCollections();
+            }
+
+        }
+        return this;
+    }
+
     public Filter andReplaceFieldWithValueFrom(SObjectField fieldToAddValue, Map<String, SObject> replacementMap, SObjectField matchingField) {
         for(String key : this.mapOfMaps.keySet()) {
             this.ref = this.mapOfMaps.get(key);
